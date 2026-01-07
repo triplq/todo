@@ -28,22 +28,22 @@ func (l *List) Add(task string) {
 }
 
 func (l *List) Complete(i int) error {
-	if i < 0 || i > len(*l) {
+	if i <= 0 || i > len(*l) {
 		return fmt.Errorf("There are no task with id: %d", i)
 	}
 
-	(*l)[i].CompletedAt = time.Now()
-	(*l)[i].Done = true
+	(*l)[i-1].CompletedAt = time.Now()
+	(*l)[i-1].Done = true
 
 	return nil
 }
 
 func (l *List) Delete(i int) error {
-	if i < 0 || i > len(*l) {
+	if i <= 0 || i > len(*l) {
 		return fmt.Errorf("There are no task with id: %d", i)
 	}
 
-	*l = append((*l)[:i], (*l)[i+1:]...)
+	*l = append((*l)[:i-1], (*l)[i:]...)
 	return nil
 }
 
