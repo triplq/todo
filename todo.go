@@ -66,7 +66,11 @@ func (l *List) Save(filename string) error {
 func (l *List) Get(filename string) error {
 	file, err := os.Open(filename)
 	if err != nil {
-		return err
+		if os.IsNotExist(err) {
+			return nil
+		} else {
+			return err
+		}
 	}
 	defer file.Close()
 
