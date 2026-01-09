@@ -23,7 +23,9 @@ func TestMain(m *testing.M) {
 	}
 
 	build := exec.Command("go", "build", "-o", binName)
+	create := exec.Command("touch", fileName)
 
+	create.Run()
 	if err := build.Run(); err != nil {
 		log.Fatal(err)
 	}
@@ -60,7 +62,7 @@ func TestTodoCLI(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		expected := task + "\n"
+		expected := fmt.Sprintf("   1: %s\n\n", task)
 		if expected != string(out) {
 			t.Errorf("Expected %q, got %q instead\n", expected, string(out))
 		}
