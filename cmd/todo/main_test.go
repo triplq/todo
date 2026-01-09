@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -23,9 +24,7 @@ func TestMain(m *testing.M) {
 	}
 
 	build := exec.Command("go", "build", "-o", binName)
-	create := exec.Command("touch", fileName)
 
-	create.Run()
 	if err := build.Run(); err != nil {
 		log.Fatal(err)
 	}
@@ -49,7 +48,23 @@ func TestTodoCLI(t *testing.T) {
 
 	cmdPath := filepath.Join(dir, binName)
 	t.Run("AddNewTask", func(t *testing.T) {
-		cmd := exec.Command(cmdPath, "-t", task)
+		cmd := exec.Command(cmdPath, "-a", task)
+		if err := cmd.Run(); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	task2 := "Add task by STDIN"
+	t.Run("AddNewTaskWithSTDIN", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-a")
+
+		cmdStdin, err := cmd.StdinPipe()
+		if err != nil {
+			t.Fatal(err)
+		}
+		io.WriteString(cmdStdin, task2)
+		cmdStdin.Close()
+
 		if err := cmd.Run(); err != nil {
 			t.Fatal(err)
 		}
@@ -62,9 +77,9 @@ func TestTodoCLI(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		expected := fmt.Sprintf("   1: %s\n\n", task)
+		expected := fmt.Sprintf("   1: %s\n   2: %s\n", task, task2)
 		if expected != string(out) {
-			t.Errorf("Expected %q, got %q instead\n", expected, string(out))
+			t.Errorf("Expected %q, got %q instead", expected, string(out))
 		}
 	})
 }
